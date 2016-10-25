@@ -16,12 +16,12 @@ tape('delegate call impersonate test', function (test) {
     opFn.delegateCall({
       gas: new Buffer('00ffffffff', 'hex'),
       toAddress: new Buffer(targetContractAddressHex.slice(2), 'hex'),
-      inOffset: new Buffer('00', 'hex'),
-      inLength: new Buffer('00', 'hex'),
-      outOffset: new Buffer('00', 'hex'),
-      outLength: new Buffer('20', 'hex'),
+      inOffset: 0x00,
+      inLength: 0x00,
+      outOffset: 0x00,
+      outLength: 0x20,
     }),
-    returnLastOnStack({ mstoreOffset: 0x60, returnLength: 0x20 }),
+    opFn.return({ offset: 12, length: 20 }),
   ]
   var reflectContractCode = new Buffer(compileStructure(reflectContractCodeStructure))
 
@@ -31,12 +31,6 @@ tape('delegate call impersonate test', function (test) {
     returnLastOnStack({ mstoreOffset: 0x60, returnLength: 0x20 }),
   ]
   var targetContractCode = new Buffer(compileStructure(targetContractCodeStructure))
-
-  // console.log(reflectContractCodeStructure)
-  // console.log(compileStructure(reflectContractCodeStructure))
-  // console.log(reflectContractCode)
-  console.log(targetContractCodeStructure)
-  console.log(targetContractCode)
 
   var blockchainState = {
     [reflectContractAddressHex]: {
@@ -76,6 +70,8 @@ tape('delegate call impersonate test', function (test) {
 
     test.ifError(err, 'Should run code without error')
     test.ifError(results.exceptionError, 'Should run code without vm error')
+
+    test.equals('0x'+results.return.toString('hex'), victimContractAddressHex, 'target contract\'s msg.sender was the victim address')
 
     test.end()
   })
