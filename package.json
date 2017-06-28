@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "eth-needlework": "^1.0.0",
-    "ethereumjs-vm": "^2.0.0",
+    "ethereumjs-vm": "^2.1.0",
     "flatten": "^1.0.2",
     "tape": "^4.6.2"
   }
