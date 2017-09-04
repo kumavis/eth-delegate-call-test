@@ -1,10 +1,10 @@
 const tape = require('tape')
-const flatten = require('flatten')
 const createHookedVm = require('ethereumjs-vm/lib/hooked')
 const _ = require('eth-needlework/lib/opCodes')
 const opFn = require('eth-needlework/lib/opFn')
 const returnLastOnStack = require('eth-needlework/lib/returnLastOnStack')
 const pushData = require('eth-needlework/lib/pushData')
+const compile = require('eth-needlework/lib/compile')
 
 tape('delegate call impersonate test', function (test) {
   var victimContractAddressHex = '0xaaaa000000000000000000000000000000000000'
@@ -23,14 +23,14 @@ tape('delegate call impersonate test', function (test) {
     }),
     opFn.return({ offset: 12, length: 20 }),
   ]
-  var reflectContractCode = new Buffer(compileStructure(reflectContractCodeStructure))
+  var reflectContractCode = new Buffer(compile(reflectContractCodeStructure))
 
   // a contract that returns the `msg.sender`
   var targetContractCodeStructure = [
     _.CALLER,
     returnLastOnStack({ mstoreOffset: 0x60, returnLength: 0x20 }),
   ]
-  var targetContractCode = new Buffer(compileStructure(targetContractCodeStructure))
+  var targetContractCode = new Buffer(compile(targetContractCodeStructure))
 
   var blockchainState = {
     [reflectContractAddressHex]: {
@@ -100,9 +100,4 @@ function hooksForBlockchainState (blockchainState) {
       cb(null, value)
     }
   }
-}
-
-// flattens buffers
-function compileStructure(structure){
-  return flatten(flatten(structure).map((maybeBuffer => Buffer.isBuffer(maybeBuffer) ? [].slice.call(maybeBuffer) : maybeBuffer)))
 }
